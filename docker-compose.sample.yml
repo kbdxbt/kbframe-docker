@@ -181,12 +181,46 @@ services:
     volumes:
       - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
       - ${DATA_DIR}/redis:/data/:rw
+      - ${REDIS_SENTINEL_CONF_FILE}:/etc/sentinel.conf:rw
     restart: always
     entrypoint: ["redis-server", "/etc/redis.conf"]
     environment:
       TZ: "$TZ"
     networks:
       - default
+
+  redis_slave_1:
+    image: redis:${REDIS_VERSION}
+    container_name: redis_slave_1
+    ports:
+      - "${REDIS_SLAVE_1_PORT}:6380"
+    volumes:
+      - ${REDIS_SLAVE_1_CONF_FILE}:/etc/redis.conf:ro
+      - ${DATA_DIR}/redis_master:/data/:rw
+      - ${REDIS_SLAVE_1_SENTINEL_CONF_FILE}:/etc/sentinel.conf:rw
+    restart: always
+    entrypoint: ["redis-server", "/etc/redis.conf"]
+    environment:
+      TZ: "$TZ"
+    networks:
+      - default
+
+  redis_slave_2:
+    image: redis:${REDIS_VERSION}
+    container_name: redis_slave_2
+    ports:
+      - "${REDIS_SLAVE_2_PORT}:6381"
+    volumes:
+      - ${REDIS_SLAVE_2_CONF_FILE}:/etc/redis.conf:ro
+      - ${DATA_DIR}/redis_slave:/data/:rw
+      - ${REDIS_SLAVE_2_SENTINEL_CONF_FILE}:/etc/sentinel.conf:rw
+    restart: always
+    entrypoint: ["redis-server", "/etc/redis.conf"]
+    environment:
+      TZ: "$TZ"
+    networks:
+      - default
+
 
 #  memcached:
 #    image: memcached:${MEMCACHED_VERSION}
